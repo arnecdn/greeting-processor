@@ -4,6 +4,7 @@ mod settings;
 use crate::kafka_consumer::ConsumeTopics;
 use crate::settings::Settings;
 use greeting_db_api::{greeting_command::GreetingCommandRepositoryImpl, init_db, migrate};
+use log::error;
 use opentelemetry::trace::TracerProvider;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -12,7 +13,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 async fn main() -> std::io::Result<()> {
     let app_config = Settings::new();
 
-    greeting_otel::init_otel(
+    let providers = greeting_otel::init_otel(
         &app_config.otel_collector.oltp_endpoint,
         "greeting_processor",
         &app_config.kube.my_pod_name,
@@ -41,5 +42,9 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Error in kafka consumer");
 
+    if let Err(e) = providers.shutdown().await{
+        error!("Failed to shut down: {:?}", e);
+    }
+    
     Ok(())
 }
