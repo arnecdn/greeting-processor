@@ -103,9 +103,10 @@ impl KafkaConsumer {
             format!("{},  Header {:#?}: {:?}", a, h.key, h.value)
         });
 
-
+        let trace_id = format!("{}", context.span().span_context().trace_id());
         let span = Span::current();
         span.set_parent(context);
+        let span_id = format!("{:?}", span.context().span().span_context().span_id());
         // let _enter = span.enter();
         // let mut span =
         //     global::tracer("consumer").start_with_context("consume_payload", &context);
@@ -115,8 +116,9 @@ impl KafkaConsumer {
         info!("Consumed topic: {}, partition: {}, offset: {}, timestamp: {:?}, headers{:?},  payload: '{}'",
                     m.topic(), m.partition(), m.offset(), m.timestamp(), header_str, payload,);
 
+        let pg_trace = greeting_db_api::greeting_pg_trace::PgTraceContext {trace_id:trace_id,parent_span_id:span_id};
         let msg:greeting_db_api::greeting_command::GreetingCmdDto = serde_json::from_str(&payload).unwrap();
-        self.repo.store(msg.clone()).await.expect("Error");
+        self.repo.store(pg_trace, msg.clone()).await.expect("Error");
         // span.set_status(Status::Ok);
         // span.end();
 
