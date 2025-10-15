@@ -117,7 +117,7 @@ impl KafkaConsumer {
                     m.topic(), m.partition(), m.offset(), m.timestamp(), header_str, payload,);
 
         let pg_trace = greeting_db_api::greeting_pg_trace::PgTraceContext {trace_id:trace_id,parent_span_id:span_id};
-        let msg:greeting_db_api::greeting_command::GreetingCmdDto = serde_json::from_str(&payload).unwrap();
+        let msg:greeting_db_api::greeting_command::GreetingCmdEntity = serde_json::from_str(&payload).unwrap();
         self.repo.store(pg_trace, msg.clone()).await.expect("Error");
         // span.set_status(Status::Ok);
         // span.end();
