@@ -952,8 +952,8 @@ dependencies = [
 
 [[package]]
 name = "greeting_db_api"
-version = "0.2.6"
-source = "git+https://github.com/arnecdn/greeting_db_api#db59ad8a01d9324be14256c05eff7a00b12c4a48"
+version = "0.2.7"
+source = "git+https://github.com/arnecdn/greeting_db_api#4581d45a9b16351b46b4ac08c1a366fea29e4467"
 dependencies = [
  "async-trait",
  "chrono",
