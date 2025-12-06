@@ -40,7 +40,7 @@ spec:
                         - name: APP__KAFKA__PROCESSING_GUARANTEE
                           value: "exactly_once"
                         - name: APP__DB__DATABASE_URL
-                          value: "postgres://greeting_rust:Z3JlZXRpbmdfcnVzdAo=@postgres-greeting:5432/greeting_rust"
+                          value: "postgres://greeting_rust:greeting_rust@postgres-greeting-service.cnpg-system.svc.cluster.local:5432/greeting_rust"
                         - name: APP__OTEL_COLLECTOR__OLTP_ENDPOINT
                           value: "http://grafana-alloy:4317"
                         - name: APP__KUBE__MY_POD_NAME
