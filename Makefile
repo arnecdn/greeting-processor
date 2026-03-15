@@ -1,9 +1,8 @@
 APP_NAME = greeting-processor
 
-
 IMAGE_NAME = arnecdn/$(APP_NAME)
 KUBERNETES_FILE = kubernetes/$(APP_NAME).yaml
-VERSION_FILE := ./kubernetes/version.txt
+VERSION_FILE := ./kubernetes/container_version_tag.txt
 TAG := $(shell [ -f $(VERSION_FILE) ] || echo "0.1" > $(VERSION_FILE); cat $(VERSION_FILE))
 
 .PHONY: build_app all build_image deploy clean validate-tag increment-version undeploy
