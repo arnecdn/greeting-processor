@@ -3,11 +3,8 @@ mod settings;
 
 use crate::kafka_consumer::ConsumeTopics;
 use crate::settings::Settings;
-use greeting_db_api::{greeting_command::GreetingCommandRepositoryImpl, init_db, migrate};
+use greeting_db_api::{greeting_command::GreetingCommandRepositoryImpl, init_db};
 use log::error;
-use opentelemetry::trace::TracerProvider;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
