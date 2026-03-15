@@ -1,5 +1,6 @@
 APP_NAME = greeting-processor
 
+
 IMAGE_NAME = arnecdn/$(APP_NAME)
 KUBERNETES_FILE = kubernetes/$(APP_NAME).yaml
 VERSION_FILE := ./kubernetes/container_version_tag.txt
@@ -40,7 +41,7 @@ build_image: validate-tag increment-version
 
 deploy: build_image
 	@echo "Applying Kubernetes deployment with TAG=$(TAG)..."
-	sed -i '' 's|image: docker.io/arnecdn/greeting-receiver:.*|image: docker.io/arnecdn/greeting-receiver:$(TAG)|' $(KUBERNETES_FILE)
+	sed -i '' 's|image: docker.io/$(IMAGE_NAME):.*|image: docker.io/$(IMAGE_NAME):$(TAG)|' $(KUBERNETES_FILE)
 	kubectl apply -f $(KUBERNETES_FILE) || { \
 		echo "Error: Failed to apply Kubernetes deployment."; \
 		exit 1; \
