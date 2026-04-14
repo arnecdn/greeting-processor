@@ -14,7 +14,7 @@ spec:
         spec:
             containers:
                 -   name: greeting-processor
-                    image: docker.io/arnecdn/greeting-processor:0.12
+                    image: docker.io/arnecdn/greeting-processor:0.13
                     imagePullPolicy: IfNotPresent
                     resources:
                         requests:
