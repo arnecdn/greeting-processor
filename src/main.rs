@@ -22,9 +22,11 @@ async fn main() -> std::io::Result<()> {
             .await
             .expect("Expected db pool"),
     );
-    
-    
-    
+
+    greeting_db_api::migrate(&pool.clone())
+        .await
+        .expect("Failed to migrate db");
+
     let repo = Box::new(
         GreetingCommandRepositoryImpl::new(pool.clone())
             .await
