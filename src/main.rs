@@ -32,14 +32,15 @@ async fn main() -> std::io::Result<()> {
             .await
             .expect("failed"),
     );
+
     let mut consumer = kafka_consumer::KafkaConsumer::new(app_config, repo)
         .await
         .expect("Failed to create kafka consumer");
 
-    consumer
-        .consume_and_store()
-        .await
-        .expect("Error in kafka consumer");
+    if let Err(e) = consumer.consume_and_store().await{
+        error!("Failed to consume kafkatopic: {:?}", e);
+    }
+
 
     if let Err(e) = providers.shutdown().await{
         error!("Failed to shut down: {:?}", e);

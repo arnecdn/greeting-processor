@@ -163,8 +163,14 @@ impl ConsumeTopics for KafkaConsumer {
             match &consumer.recv().await {
                 Err(e) => warn!("Kafka error: {}", e),
                 Ok(m) => {
-                    self.store_message(m).await?;
-                    consumer.commit_message(&m, CommitMode::Async)?;
+                    match self.store_message(m).await {
+                        Ok(_) => {
+                            consumer.commit_message(&m, CommitMode::Async)?;
+                        }
+                        Err(e) => {
+                            warn!("Failed to process message at partition: {}, offset: {}: {:?}", m.partition(), m.offset(), e);
+                        }
+                    }
                 }
             };
         }
