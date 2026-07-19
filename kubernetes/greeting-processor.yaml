@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
     name: greeting-processor
 spec:
-    replicas: 0
+    replicas: 1
     selector:
         matchLabels:
             app: greeting-processor
@@ -14,7 +14,7 @@ spec:
         spec:
             containers:
                 -   name: greeting-processor
-                    image: docker.io/arnecdn/greeting-processor:0.19
+                    image: docker.io/arnecdn/greeting-processor:0.23
                     imagePullPolicy: IfNotPresent
                     resources:
                         requests:
@@ -49,7 +49,7 @@ spec:
                                   fieldPath: metadata.name
 
                     command:
-                              - "/bin/server"
+                              - "/usr/bin/server"
 
 
 ---

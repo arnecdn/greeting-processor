@@ -8,7 +8,6 @@
 
 ARG RUST_VERSION=1.89-bullseye
 ARG APP_NAME=greeting-processor
-
 ################################################################################
 # Create a stage for building the application.
 
@@ -16,60 +15,35 @@ FROM docker.io/rust:${RUST_VERSION} AS build
 ARG APP_NAME
 WORKDIR /app
 
-# Install host build dependencies.
-RUN apt-get update && apt-get install -y cmake
 
-ENV DATABASE_URL=""
+# Install host build dependencies.
+RUN apt-get update && apt-get install -y --no-install-recommends cmake && rm -rf /var/lib/apt/lists/*
 
 # Build the application.
-# Leverage a cache mount to /usr/local/cargo/registry/
-# for downloaded dependencies, a cache mount to /usr/local/cargo/git/db
-# for git repository dependencies, and a cache mount to /app/target/ for
-# compiled dependencies which will speed up subsequent builds.
-# Leverage a bind mount to the src directory to avoid having to copy the
-# source code into the container. Once built, copy the executable to an
-# output directory before the cache mounted /app/target is unmounted.
-#RUN --mount=type=bind,source=src,target=src \
-#    --mount=type=bind,source=migrations,target=migrations \
-#    --mount=type=bind,source=.sqlx,target=.sqlx \
-#    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
-#    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
-#    --mount=type=cache,target=/usr/local/cargo/git/db \
-#    --mount=type=cache,target=/usr/local/cargo/registry/ \
-#    cargo build --locked --release && \
-#    cp ./target/release/$APP_NAME /bin/server && \
-#    mkdir -p /bin/migrations && \
-#    cp migrations/* /bin/migrations
 COPY . .
-RUN cargo build --locked --release && \
-    cp ./target/release/$APP_NAME /bin/server
+RUN cargo build --locked --release
+RUN cp ./target/release/$APP_NAME /usr/bin/server
+RUN libdir="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" && \
+	mkdir -p "/runtime-libs/lib/${libdir}" && \
+	cp -a "/lib/${libdir}/libz.so.1"* "/runtime-libs/lib/${libdir}/"
+
+
 ################################################################################
 # Create a new stage for running the application that contains the minimal
 # runtime dependencies for the application. This often uses a different base
 # image from the build stage where the necessary files are copied from the build
 # stage.
 #
-# The example below uses the alpine image as the foundation for running the app.
-# By specifying the "3.18" tag, it will use version 3.18 of alpine. If
-# reproducability is important, consider using a digest
-# (e.g., alpine@sha256:664888ac9cfd28068e062c991ebcff4b4c7307dc8dd4df9e728bedde5c449d91).
-FROM docker.io/rust:1.89-slim-bullseye AS final
+# Using distroless/cc-debian12 for minimal size while keeping libc and openssl
+# support for Kafka operator TLS/network operations. This is ~100x smaller than
+# rust:slim-bullseye while maintaining runtime compatibility.
+FROM gcr.io/distroless/cc-debian12:nonroot AS final
 
-#RUN apk update && apk add gcompat strace
-
-
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
-USER appuser
+# Copy the zlib runtime required by rdkafka/libz-sys.
+COPY --from=build /runtime-libs/ /
 
 # Copy the executable from the "build" stage.
-COPY --chown=appuser:appuser --from=build /bin/server /bin/
+COPY --chown=nonroot:nonroot --from=build /usr/bin/server /usr/bin/server
+
+USER nonroot:nonroot
+
