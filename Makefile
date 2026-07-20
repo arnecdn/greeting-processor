@@ -1,6 +1,5 @@
 APP_NAME := $(shell grep '^name = ' Cargo.toml | sed 's/name = "\(.*\)"/\1/')
 
-VERSION_FILE := ./kubernetes/container_version_tag.txt
 KUBERNETES_FILE = kubernetes/$(APP_NAME).yaml
 IMAGE_NAME = arnecdn/$(APP_NAME)
 
