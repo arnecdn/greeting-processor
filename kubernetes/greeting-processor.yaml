@@ -14,7 +14,7 @@ spec:
         spec:
             containers:
                 -   name: greeting-processor
-                    image: docker.io/arnecdn/greeting-processor:0.30
+                    image: docker.io/arnecdn/greeting-processor:0.1
                     imagePullPolicy: IfNotPresent
                     resources:
                         requests:
@@ -28,7 +28,7 @@ spec:
                     env:
 
                         - name: APP__KAFKA__BROKER
-                          value: "kafka-service:9093"
+                          value: "kafka-service.kafka.svc.cluster.local:9092"
                         - name: APP__KAFKA__TOPIC
                           value: "greetings"
                         - name: APP__KAFKA__CONSUMER_GROUP
@@ -40,7 +40,7 @@ spec:
                         - name: APP__KAFKA__PROCESSING_GUARANTEE
                           value: "exactly_once"
                         - name: APP__DB__DATABASE_URL
-                          value: "postgres://greeting_rust:greeting_rust@postgres-greeting-service.cnpg-system.svc.cluster.local:5432/greeting_rust"
+                          value: "postgres://greeting_rust:greeting_rust@postgres-greeting-service.default.svc.cluster.local:5432/greeting_rust"
                         - name: APP__OTEL_COLLECTOR__OLTP_ENDPOINT
                           value: "http://meta-monitoring-alloy.meta-monitoring.svc.cluster.local:4317"
                         - name: APP__KUBE__MY_POD_NAME
