@@ -83,7 +83,7 @@ spec:
         - type: kafka
           metadata:
               consumerGroup: "greeting_consumers"
-              bootstrapServers: kafka-service.default.svc.cluster.local:9093
+              bootstrapServers: kafka-service.kafka.svc.cluster.local:9093
               topic: greetings
               lagThreshold: "10"
               offsetResetPolicy: latest
